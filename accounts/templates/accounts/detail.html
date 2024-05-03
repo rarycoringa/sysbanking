@@ -1,0 +1,13 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}{{ template_title }}{% endblock %}
+
+{% block content %}
+    <h1>Account:</h1>
+    <h3>Number: {{ account.number}} </h3>
+    <h3>Balance: $ {{ account.balance }}</h3>
+    <a href="{% url 'accounts:list' %}" class="btn btn-secondary disabled">Deposit</a>
+    <a href="{% url 'accounts:list' %}" class="btn btn-secondary disabled">Transfer</a>
+    <a href="{% url 'accounts:list' %}" class="btn btn-secondary disabled">Withdraw</a>
+    <a href="{% url 'accounts:list' %}" class="btn btn-outline-secondary">Return</a>
+{% endblock %}
