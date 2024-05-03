@@ -6,6 +6,6 @@
     <h1>Accounts:</h1>
     {% for account in accounts %}
         <h3>Number: {{ account.number}} </h3>
-        <a href="{% url 'accounts:detail' account.number %}" class="btn btn-primary">Open</a>
+        <a href="{% url 'accounts:detail' account.number %}" class="btn btn-outline-secondary">Open</a>
     {% endfor %}
 {% endblock %}
