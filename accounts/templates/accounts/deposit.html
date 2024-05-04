@@ -1,0 +1,26 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}{{ template_title }}{% endblock %}
+
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        
+        <div class="form-floating mb-3">
+            <input type="number" step=".01" class="form-control" name="amount" id="amount" placeholder="123456" required>
+            <label for="amount" class="form-label"> Amount to Deposit </label>
+        </div>
+
+        <button type="submit" class="btn btn-outline-secondary">Create</button>
+        <a href="{% url 'accounts:detail' account.number %}" class="btn btn-danger">Cancel</a>
+    </form>
+{% endblock %}
