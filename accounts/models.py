@@ -29,3 +29,10 @@ class Account(models.Model):
         null=False,
         default=decimal.Decimal(0.0),
     )
+
+    def deposit(self, amount:decimal.Decimal):
+        if type(amount) is not decimal.Decimal:
+            amount: decimal.Decimal = decimal.Decimal(amount)
+        self.balance = self.balance + amount
+        self.save()
+        
