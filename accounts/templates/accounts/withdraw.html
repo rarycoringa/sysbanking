@@ -10,17 +10,17 @@
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
             <div>{{ message }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cancel"></button>
         </div>
         {% endfor %}
         {% endif %}
         
         <div class="form-floating mb-3">
             <input type="number" step=".01" class="form-control" name="amount" id="amount" placeholder="123456" required>
-            <label for="amount" class="form-label"> Amount to Deposit </label>
+            <label for="amount" class="form-label"> Amount to Withdraw </label>
         </div>
 
-        <button type="submit" class="btn btn-secondary">Deposit</button>
+        <button type="submit" class="btn btn-secondary">Withdraw</button>
         <a href="{% url 'accounts:detail' account.number %}" class="btn btn-danger">Cancel</a>
     </form>
 {% endblock %}

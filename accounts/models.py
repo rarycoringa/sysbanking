@@ -38,3 +38,8 @@ class Account(models.Model):
 
         self.save()
         
+    def withdraw(self, amount:decimal.Decimal):
+        if type(amount) is not decimal.Decimal:
+            amount: decimal.Decimal = decimal.Decimal(amount)
+        self.balance = self.balance - amount
+        self.save()
