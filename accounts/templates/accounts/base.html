@@ -12,7 +12,19 @@
     </head>
 
     <body>
-        {% block content %}{% endblock %}
+        <div class="d-flex flex-column align-items-center">
+            <div class="d-flex flex-column align-items-center mt-2 mb-4">
+                <span class="fs-1 fw-bold">Sysbanking</span>
+                <span class="fs-5 fw-light">Your Friendly Banking</span>
+            </div>
+
+            {% block content %}{% endblock %}
+
+            <div class="d-flex flex-column align-items-center mt-4 mb-2 position-absolute bottom-0">
+                <span class="fs-6 fst-italic fw-light">Sysbanking &copy; {{ current_year }}</span>
+                <span class="fs-6 fst-italic fw-light">Built with Django by Giselle and Rary</span>
+            </div>
+        </div>
     </body>
 
 </html>
