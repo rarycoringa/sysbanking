@@ -83,3 +83,16 @@ class MakeDepositView(TemplateTitleMixin, TransactionView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
+class MakeWithdrawView(TemplateTitleMixin, TransactionView):
+    context_object_name: str = "account"
+    model: Account = Account
+    slug_field: str = "number"
+    slug_url_kwarg: str = "number"
+    template_name: str = "accounts/withdraw.html"
+    template_title: str = "Make Withdraw"
+    transaction_name: str  = "withdraw"
+    transaction_parameters_names: List[str] = ["amount"]
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
