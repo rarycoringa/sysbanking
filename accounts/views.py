@@ -77,7 +77,7 @@ class TransactionView(DetailView):
 
         return self.transaction_valid()
 
-class MakeDepositView(TemplateTitleMixin, TransactionView):
+class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
     model: Account = Account
     slug_field: str = "number"
@@ -90,7 +90,7 @@ class MakeDepositView(TemplateTitleMixin, TransactionView):
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
 
-class MakeWithdrawView(TemplateTitleMixin, TransactionView):
+class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
     model: Account = Account
     slug_field: str = "number"
