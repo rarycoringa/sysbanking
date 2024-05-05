@@ -35,4 +35,15 @@ class Account(models.Model):
             amount: decimal.Decimal = decimal.Decimal(amount)
         self.balance = self.balance + amount
         self.save()
-        
+    
+    def transfer(self, amount:decimal.Decimal, to_account:decimal.Decimal):
+        if type(amount) is not decimal.Decimal:
+            amount: decimal.Decimal = decimal.Decimal(amount)
+        if type(to_account) is not decimal.Decimal:
+            to_account: decimal.Decimal = decimal.Decimal(to_account)
+        self.balance = self.balance - amount
+        self.save()
+
+        to_account_object = Account.objects.get(number=to_account)
+        to_account_object.deposit(amount)
+        to_account_object.save()
