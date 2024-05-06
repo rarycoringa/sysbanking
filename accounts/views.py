@@ -90,6 +90,19 @@ class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
 
+class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
+    context_object_name: str = "account"
+    model: Account = Account
+    slug_field: str = "number"
+    slug_url_kwarg: str = "number"
+    template_name: str = "accounts/transfer.html"
+    template_title: str = "Transfer"
+    transaction_name: str  = "transfer"
+    transaction_parameters_names: List[str] = ["amount", "to_account"]
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
 class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
     model: Account = Account
