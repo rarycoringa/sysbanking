@@ -2,6 +2,10 @@ import uuid
 import decimal
 
 from django.db import models
+from django.core.validators import MinValueValidator
+
+from accounts.exceptions import InsufficientBalance
+
 
 class Account(models.Model):
     id = models.UUIDField(
@@ -28,9 +32,10 @@ class Account(models.Model):
         blank=False,
         null=False,
         default=decimal.Decimal(0.0),
+        validators=[MinValueValidator(decimal.Decimal(0.0))]
     )
 
-    def deposit(self, amount: decimal.Decimal):
+    def deposit(self, amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
 
@@ -38,20 +43,31 @@ class Account(models.Model):
 
         self.save()
     
-    def transfer(self, amount:decimal.Decimal, to_account:decimal.Decimal):
+    def transfer(self, amount: decimal.Decimal, to_account: int) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
-        if type(to_account) is not decimal.Decimal:
-            to_account: decimal.Decimal = decimal.Decimal(to_account)
-        self.balance = self.balance - amount
-        self.save()
 
-        to_account_object = Account.objects.get(number=to_account)
-        to_account_object.deposit(amount)
-        to_account_object.save()
+        if self.balance < amount:
+            raise InsufficientBalance("Account doesn't have sufficient balance.")
+
+        if type(amount) is not int:
+            to_account: int = int(to_account)
+
+        to_account: Account = Account.objects.get(number=to_account)
+
+        self.withdraw(amount)
+        to_account.deposit(amount)
         
-    def withdraw(self, amount:decimal.Decimal):
+        self.save()
+        to_account.save()
+        
+    def withdraw(self, amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
+
+        if self.balance < amount:
+            raise InsufficientBalance("Account doesn't have sufficient balance.")
+
         self.balance = self.balance - amount
+
         self.save()
