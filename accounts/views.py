@@ -5,7 +5,7 @@ from typing import Callable
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-
+from django.core.exceptions import ValidationError
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -50,13 +50,15 @@ class TransactionView(DetailView):
     transaction_name: str = None
     transaction_parameters_names: List[str] = None
 
-    def transaction_valid(self) -> HttpResponseRedirect:
+    def transaction_valid(self, message: str = "Transaction sucessfully completed.") -> HttpResponseRedirect:
         """If the form is valid, redirect to the supplied URL."""
+        messages.success(self.request, message, extra_tags="success")
+
         return HttpResponseRedirect(self.get_success_url())
 
-    def transaction_invalid(self, reason: str) -> HttpResponse:
+    def transaction_invalid(self, reason: str = "Failed trying to do transaction.") -> HttpResponse:
         """If the form is invalid, render the invalid form."""
-        messages.error(self.request, reason)
+        messages.error(self.request, reason, extra_tags="danger")
 
         return self.render_to_response(self.get_context_data())
 
@@ -72,10 +74,12 @@ class TransactionView(DetailView):
 
         try:
             transaction_method(**transaction_parameters)
-        except BaseException as err:
-            return self.transaction_invalid(err)
+        except ValidationError as err:
+            return self.transaction_invalid(err.message)
 
-        return self.transaction_valid()
+        success_message: str = f"{self.transaction_name.title()} successfuly completed."
+
+        return self.transaction_valid(success_message)
 
 class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
@@ -88,7 +92,7 @@ class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:deposit', kwargs={"number": self.object.number})
 
 class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
@@ -101,7 +105,7 @@ class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount", "to_account"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:transfer', kwargs={"number": self.object.number})
 
 class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
@@ -114,4 +118,4 @@ class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:withdraw', kwargs={"number": self.object.number})
