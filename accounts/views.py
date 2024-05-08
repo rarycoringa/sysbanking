@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Union
@@ -10,6 +11,7 @@ from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -33,6 +35,15 @@ class DetailAccountView(CurrentYearMixin, TemplateTitleMixin, DetailView):
     slug_url_kwarg: str = "number"
     template_name: str = "accounts/detail.html"
     template_title: str = "Account Details"
+
+    def get_context_data(self: View, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        context_data: Dict[str, Any] = super().get_context_data(**kwargs)
+
+        retrieved_messages: List[Any] = messages.get_messages(self.request)
+        if retrieved_messages:
+            context_data["messages"] = retrieved_messages
+
+        return context_data
     
 
 class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixin, CreateView):
@@ -45,6 +56,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     def get_success_message(self, cleaned_data: Dict[str, str]) -> str:
         account: Account = self.object
         return f"Account Nº {account.number} was successfully created."
+
 
 class TransactionView(DetailView):
     transaction_name: str = None
@@ -81,6 +93,7 @@ class TransactionView(DetailView):
 
         return self.transaction_valid(success_message)
 
+
 class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
     model: Account = Account
@@ -92,7 +105,8 @@ class MakeDepositView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:deposit', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
 
 class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
@@ -105,7 +119,8 @@ class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount", "to_account"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:transfer', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
 
 class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     context_object_name: str = "account"
@@ -118,4 +133,4 @@ class MakeWithdrawView(TemplateTitleMixin, CurrentYearMixin, TransactionView):
     transaction_parameters_names: List[str] = ["amount"]
 
     def get_success_url(self) -> str:
-        return reverse_lazy('accounts:withdraw', kwargs={"number": self.object.number})
+        return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})

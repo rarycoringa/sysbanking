@@ -7,6 +7,15 @@
         <div class="row row-cols-1">
             <div class="col mb-3">
                 <div class="card text-center">
+                    {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.extra_tags }} alert-dismissible" role="alert">
+                            <div>{{ message }}</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    {% endif %}
+                    
                     <div class="card-header">
                         <span class="fs-6 fw-bold text-secondary-emphasis">
                             Account Nº {{ account.number }}
