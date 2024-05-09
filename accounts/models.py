@@ -7,6 +7,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 from accounts.exceptions import InsufficientBalance
+from accounts.exceptions import NegativeTransaction
 
 
 class Account(models.Model):
@@ -49,6 +50,9 @@ class Account(models.Model):
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
 
+        if amount < decimal.Decimal(0.0):
+            raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
+
         self.balance: decimal.Decimal = self.balance + amount
 
         self.save()
@@ -56,6 +60,9 @@ class Account(models.Model):
     def withdraw(self, amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
+
+        if amount < decimal.Decimal(0.0):
+            raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
         if self.balance < amount:
             raise InsufficientBalance("Account doesn't have sufficient balance.")
@@ -74,6 +81,9 @@ class Account(models.Model):
     def transfer(amount: decimal.Decimal, from_account: Account, to_account: Account) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
+
+        if amount < decimal.Decimal(0.0):
+            raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
         from_account.transfer_withdraw(amount)
         to_account.transfer_deposit(amount)
