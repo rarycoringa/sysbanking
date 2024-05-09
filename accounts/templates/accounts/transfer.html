@@ -8,9 +8,12 @@
             <div class="col mb-3">
                 <div class="card text-center">
                     <form method="POST">
-                        <div class="card-header">
+                        <div class="card-header d-flex flex-row justify-content-between">
                             <span class="fs-6 fw-bold text-secondary-emphasis">
-                                Transfer from Account Nº {{ account.number }}
+                                Account Nº {{ account.number }}
+                            </span>
+                            <span class="badge text-bg-secondary">
+                                {{ account.verbose_type }}
                             </span>
                         </div>
 
