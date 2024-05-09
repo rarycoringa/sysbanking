@@ -11,6 +11,7 @@ from django.http import HttpResponseRedirect
 
 from accounts.models import Account
 from accounts.models import BonusAccount
+from accounts.models import SavingsAccount
 
 
 class CurrentYearMixin():
@@ -29,9 +30,16 @@ class GetAccountMultipleTypesMixin():
     slug_field: str
     slug_url_kwarg: str
 
-    def get_object(self) -> Account | BonusAccount:
+    def get_object(self) -> Account | BonusAccount | SavingsAccount:
         
         account: QuerySet[BonusAccount] = BonusAccount.objects.filter(
+            **{self.slug_field: self.kwargs.get(self.slug_url_kwarg)}
+        )
+
+        if account:
+            return account.get()
+
+        account: QuerySet[SavingsAccount] = SavingsAccount.objects.filter(
             **{self.slug_field: self.kwargs.get(self.slug_url_kwarg)}
         )
 
@@ -44,8 +52,15 @@ class GetAccountMultipleTypesMixin():
         
         return account.get()
     
-    def get_account_by_number(self, number: int) -> Account | BonusAccount:
+    def get_account_by_number(self, number: int) -> Account | BonusAccount | SavingsAccount:
         account: QuerySet[BonusAccount] = BonusAccount.objects.filter(
+            number=number,
+        )
+
+        if account:
+            return account.get()
+
+        account: QuerySet[SavingsAccount] = SavingsAccount.objects.filter(
             number=number,
         )
 

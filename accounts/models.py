@@ -121,3 +121,23 @@ class BonusAccount(Account):
     def transfer_deposit(self, amount: decimal.Decimal, cutoff_amount: decimal.Decimal = decimal.Decimal(200.00)) -> None:
         self.deposit(amount, cutoff_amount)
     
+
+class SavingsAccount(Account):
+    @property
+    def type(self) -> str:     
+        return "savings"
+
+    @property
+    def verbose_type(self) -> str:
+        return "Savings Account"
+
+    @classmethod
+    def generate_yield_for_savings_accounts(cls, taxes: decimal.Decimal) -> None:
+        if type(taxes) is not decimal.Decimal:
+            taxes:decimal.Decimal = decimal.Decimal(taxes)
+
+        accounts = SavingsAccount.objects.all()
+
+        for account in accounts:
+            yields = (account.balance * taxes) / decimal.Decimal(100)
+            account.deposit(yields)

@@ -24,6 +24,7 @@ from accounts.mixins import TemplateTitleMixin
 from accounts.mixins import TransactionValidationMixin
 from accounts.models import Account
 from accounts.models import BonusAccount
+from accounts.models import SavingsAccount
 
 
 class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
@@ -32,10 +33,11 @@ class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
     template_name: str = "accounts/list.html"
     template_title: str = "Account List"
 
-    def get_queryset(self) -> Set[Account | BonusAccount]:
+    def get_queryset(self) -> Set[Account | BonusAccount | SavingsAccount]:
         simple_accounts: List[Account] = [
             account for account in self.model.objects.filter(
                 bonusaccount__isnull=True,
+                savingsaccount__isnull=True,
             )
         ]
 
@@ -43,8 +45,12 @@ class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
             account for account in BonusAccount.objects.all()
         ]
 
-        all_accounts: Set[Account | BonusAccount] = {
-            account for account in simple_accounts + bonus_accounts
+        savings_accounts: List[SavingsAccount] = [
+            account for account in SavingsAccount.objects.all()
+        ]
+
+        all_accounts: Set[Account | BonusAccount | SavingsAccount] = {
+            account for account in simple_accounts + bonus_accounts + savings_accounts
         }
 
         return all_accounts
@@ -78,6 +84,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     model_class_map: Dict[str, Account] = {
         "simple": Account,
         "bonus": BonusAccount,
+        "savings": SavingsAccount,
     }
 
     def get_success_message(self, cleaned_data: Dict[str, str]) -> str:
@@ -87,7 +94,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         type: str = request.POST.get("type")
 
-        self.model: Account | BonusAccount = self.model_class_map[type]
+        self.model: Account | BonusAccount | SavingsAccount = self.model_class_map[type]
 
         return super().post(request, *args, **kwargs)
 
