@@ -40,7 +40,7 @@ class Account(models.Model):
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
 
-        if amount < 0:
+        if amount < decimal.Decimal(0.0):
             raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
         self.balance: decimal.Decimal = self.balance + amount
@@ -51,7 +51,7 @@ class Account(models.Model):
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
 
-        if amount < 0:
+        if amount < decimal.Decimal(0.0):
             raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
         if self.balance < amount:
@@ -72,7 +72,7 @@ class Account(models.Model):
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
 
-        if amount < 0:
+        if amount < decimal.Decimal(0.0):
             raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
         if self.balance < amount:
