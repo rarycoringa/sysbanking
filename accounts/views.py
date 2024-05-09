@@ -17,6 +17,7 @@ from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import DetailView
 from django.views.generic import ListView
+from django.views.generic import TemplateView
 
 from accounts.mixins import CurrentYearMixin
 from accounts.mixins import GetAccountMultipleTypesMixin
@@ -24,6 +25,7 @@ from accounts.mixins import TemplateTitleMixin
 from accounts.mixins import TransactionValidationMixin
 from accounts.models import Account
 from accounts.models import BonusAccount
+from accounts.models import SavingsAccount
 
 
 class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
@@ -32,10 +34,11 @@ class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
     template_name: str = "accounts/list.html"
     template_title: str = "Account List"
 
-    def get_queryset(self) -> Set[Account | BonusAccount]:
+    def get_queryset(self) -> Set[Account | BonusAccount | SavingsAccount]:
         simple_accounts: List[Account] = [
             account for account in self.model.objects.filter(
                 bonusaccount__isnull=True,
+                savingsaccount__isnull=True,
             )
         ]
 
@@ -43,8 +46,12 @@ class ListAccountView(CurrentYearMixin, TemplateTitleMixin, ListView):
             account for account in BonusAccount.objects.all()
         ]
 
-        all_accounts: Set[Account | BonusAccount] = {
-            account for account in simple_accounts + bonus_accounts
+        savings_accounts: List[SavingsAccount] = [
+            account for account in SavingsAccount.objects.all()
+        ]
+
+        all_accounts: Set[Account | BonusAccount | SavingsAccount] = {
+            account for account in simple_accounts + bonus_accounts + savings_accounts
         }
 
         return all_accounts
@@ -78,6 +85,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     model_class_map: Dict[str, Account] = {
         "simple": Account,
         "bonus": BonusAccount,
+        "savings": SavingsAccount,
     }
 
     def get_success_message(self, cleaned_data: Dict[str, str]) -> str:
@@ -87,7 +95,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         type: str = request.POST.get("type")
 
-        self.model: Account | BonusAccount = self.model_class_map[type]
+        self.model: Account | BonusAccount | SavingsAccount = self.model_class_map[type]
 
         return super().post(request, *args, **kwargs)
 
@@ -189,3 +197,15 @@ class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransferView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
+class GenerateYieldsView(TemplateTitleMixin, CurrentYearMixin, TemplateView):
+    template_title: str = "Generate Yields"
+    template_name: str = "accounts/yields.html"
+
+    def post(self, request, *args, **kwargs):
+        tax = request.POST.get("tax")
+        result = SavingsAccount.generate_yield_for_savings_accounts(tax)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('accounts:list')
