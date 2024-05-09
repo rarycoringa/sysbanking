@@ -38,6 +38,17 @@
                             </div>
                             {% endfor %}
                             {% endif %}
+
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="type" value="simple" id="simple" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="simple">Simple Account</label>
+                              
+                                <input type="radio" class="btn-check" name="type" value="savings" id="savings" autocomplete="off" disabled>
+                                <label class="btn btn-outline-secondary" for="savings">Savings Account</label>
+                              
+                                <input type="radio" class="btn-check" name="type" value="bonus" id="bonus" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="bonus">Bonus Account</label>
+                            </div>
                         </div>
 
                         <div class="card-footer d-flex flex-columns justify-content-evenly gap-3">
