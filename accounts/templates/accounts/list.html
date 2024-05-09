@@ -4,9 +4,12 @@
 
 {% block content %}
     <div class="container text-center">
-        <div class="row row-cols-1">
+        <div class="row row-cols-2">
             <div class="col mb-3">
                 <a href="{% url 'accounts:create' %}" class="btn btn-secondary w-100">Create Account</a>
+            </div>
+            <div class="col mb-3">
+                <a href="{% url 'accounts:yields' %}" class="btn btn-secondary w-100">Generate Yields</a>
             </div>
         </div>
 

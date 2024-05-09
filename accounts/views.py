@@ -17,6 +17,7 @@ from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import DetailView
 from django.views.generic import ListView
+from django.views.generic import TemplateView
 
 from accounts.mixins import CurrentYearMixin
 from accounts.mixins import GetAccountMultipleTypesMixin
@@ -196,3 +197,15 @@ class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransferView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
+class GenerateYieldsView(TemplateTitleMixin, CurrentYearMixin, TemplateView):
+    template_title: str = "Generate Yields"
+    template_name: str = "accounts/yields.html"
+
+    def post(self, request, *args, **kwargs):
+        tax = request.POST.get("tax")
+        result = SavingsAccount.generate_yield_for_savings_accounts(tax)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('accounts:list')
