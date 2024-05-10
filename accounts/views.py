@@ -94,7 +94,6 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         type: str = request.POST.get("type")
-        print(request.POST)
 
         self.model: Account | BonusAccount | SavingsAccount = self.model_class_map[type]
 
