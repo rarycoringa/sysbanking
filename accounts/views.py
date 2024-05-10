@@ -77,7 +77,7 @@ class DetailAccountView(CurrentYearMixin, GetAccountMultipleTypesMixin, Template
     
 
 class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixin, CreateView):
-    fields: List[str] = ["number"]
+    fields: List[str] = ["number", "balance"]
     model: Account = Account
     success_url = reverse_lazy('accounts:create')
     template_name: str = "accounts/create.html"
@@ -94,6 +94,7 @@ class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixi
     
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         type: str = request.POST.get("type")
+        print(request.POST)
 
         self.model: Account | BonusAccount | SavingsAccount = self.model_class_map[type]
 
