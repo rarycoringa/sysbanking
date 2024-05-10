@@ -77,7 +77,7 @@ class DetailAccountView(CurrentYearMixin, GetAccountMultipleTypesMixin, Template
     
 
 class CreateAccountView(SuccessMessageMixin, CurrentYearMixin, TemplateTitleMixin, CreateView):
-    fields: List[str] = ["number"]
+    fields: List[str] = ["number", "balance"]
     model: Account = Account
     success_url = reverse_lazy('accounts:create')
     template_name: str = "accounts/create.html"
