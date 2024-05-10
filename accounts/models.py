@@ -35,7 +35,7 @@ class Account(models.Model):
         blank=False,
         null=False,
         default=decimal.Decimal(0.0),
-        validators=[MinValueValidator(decimal.Decimal(0.0))]
+        validators=[MinValueValidator(decimal.Decimal(-1000.0))]
     )
 
     @property
@@ -45,6 +45,10 @@ class Account(models.Model):
     @property
     def verbose_type(self) -> str:
         return "Account"
+    
+    @property
+    def minimum_balance_value(self) -> decimal.Decimal:
+        return decimal.Decimal(-1000.0)
 
     def deposit(self, amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
@@ -64,7 +68,7 @@ class Account(models.Model):
         if amount < decimal.Decimal(0.0):
             raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
-        if self.balance < amount:
+        if (self.balance - amount) < self.minimum_balance_value:
             raise InsufficientBalance("Account doesn't have sufficient balance.")
 
         self.balance: decimal.Decimal = self.balance - amount
@@ -140,6 +144,10 @@ class SavingsAccount(Account):
     @property
     def verbose_type(self) -> str:
         return "Savings Account"
+    
+    @property
+    def minimum_balance_value(self) -> decimal.Decimal:
+        return decimal.Decimal(0.0)
 
     @classmethod
     def generate_yield_for_savings_accounts(cls, taxes: decimal.Decimal) -> None:
