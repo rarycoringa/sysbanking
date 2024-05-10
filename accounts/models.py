@@ -132,7 +132,7 @@ class BonusAccount(Account):
 
         self.save()
 
-    def transfer_deposit(self, amount: decimal.Decimal, cutoff_amount: decimal.Decimal = decimal.Decimal(200.00)) -> None:
+    def transfer_deposit(self, amount: decimal.Decimal, cutoff_amount: decimal.Decimal = decimal.Decimal(150.00)) -> None:
         self.deposit(amount, cutoff_amount)
     
 
