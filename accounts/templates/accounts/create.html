@@ -31,7 +31,7 @@
                                 <label for="number" class="form-label">{{ form.number.label_tag }}</label>
                             </div>
 
-                            <div id="initialBalanceInput" class="form-floating mb-3" style="display: none;">
+                            <div id="initialBalanceInput" class="form-floating mb-3">
                                 <input type="number" step=".01" class="form-control" name="balance" id="balance" placeholder="123456" value=0>
                                 <label for="balance" class="form-label">Initial Balance</label>
                             </div>
@@ -76,7 +76,7 @@
     <script>
         document.querySelectorAll('input[type="radio"][name="type"]').forEach( e => {
             e.addEventListener('change', function() {
-                if (this.value == "savings") {
+                if (this.value == "savings" || this.value == "simple") {
                     initialBalanceInput.style.display = "block";               
                 } else {
                     initialBalanceInput.style.display = "none";     
