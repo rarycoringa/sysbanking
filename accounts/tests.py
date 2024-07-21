@@ -80,7 +80,8 @@ class RetrieveAccountTestCase(TransactionTestCase):
 
         self.assertEqual(account, self.dummy_simple_account)
         self.assertEqual(account.balance, self.dummy_simple_account.balance)
-        
+        self.assertEqual(account.type, AccountType.simple)
+
         self.assertNotIsInstance(account, BonusAccount)
         self.assertNotIsInstance(account, SavingsAccount)
 
@@ -90,6 +91,7 @@ class RetrieveAccountTestCase(TransactionTestCase):
         self.assertEqual(account, self.dummy_bonus_account)
         self.assertEqual(account.balance, self.dummy_bonus_account.balance)
         self.assertEqual(account.points, self.dummy_bonus_account.points)
+        self.assertEqual(account.type, AccountType.bonus)
 
         self.assertIsInstance(account, Account)
         self.assertNotIsInstance(account, SavingsAccount)
@@ -99,6 +101,7 @@ class RetrieveAccountTestCase(TransactionTestCase):
 
         self.assertEqual(account, self.dummy_savings_account)
         self.assertEqual(account.balance, self.dummy_savings_account.balance)
+        self.assertEqual(account.type, AccountType.savings)
 
         self.assertIsInstance(account, Account)
         self.assertNotIsInstance(account, BonusAccount)
@@ -129,4 +132,60 @@ class TransferTestCase(TransactionTestCase):
 
 
 class YieldsTestCase(TransactionTestCase):
-    ...
+    def setUp(self):
+        self.number_balance_mapping = [
+            (1, decimal.Decimal(100.0)),
+            (2, decimal.Decimal(200.0)),
+            (3, decimal.Decimal(300.0)),
+        ]
+
+    def test_generate_yields_for_savings_accounts(self):
+        for number, initial_balance in self.number_balance_mapping:
+            SavingsAccount.objects.create(number=number, balance=initial_balance)
+
+        taxes = decimal.Decimal(50.0)
+
+        SavingsAccount.generate_yield_for_savings_accounts(taxes=taxes)
+
+        for number, initial_balance in self.number_balance_mapping:
+            account = SavingsAccount.objects.get(number=number)
+            
+            self.assertNotEqual(account.balance, initial_balance)
+            
+            expected_balance = initial_balance + (initial_balance * taxes / decimal.Decimal(100.0))
+
+            self.assertEqual(account.balance, expected_balance)
+
+    def test_simple_account_should_not_generate_yields(self):
+        for number, initial_balance in self.number_balance_mapping:
+            Account.objects.create(number=number, balance=initial_balance)
+
+        taxes = decimal.Decimal(50.0)
+
+        SavingsAccount.generate_yield_for_savings_accounts(taxes=taxes)
+
+        for number, initial_balance in self.number_balance_mapping:
+            account = Account.objects.get(number=number)
+            
+            self.assertEqual(account.balance, initial_balance)
+
+    def test_bonus_account_should_not_generate_yields(self):
+        for number, initial_balance in self.number_balance_mapping:
+            BonusAccount.objects.create(number=number, balance=initial_balance)
+
+        taxes = decimal.Decimal(50.0)
+
+        SavingsAccount.generate_yield_for_savings_accounts(taxes=taxes)
+
+        for number, initial_balance in self.number_balance_mapping:
+            account = Account.objects.get(number=number)
+            
+            self.assertEqual(account.balance, initial_balance)
+    
+    def test_simple_account_does_not_have_yields_feature(self):
+        with self.assertRaises(AttributeError):
+            Account.generate_yield_for_savings_accounts(taxes=10)
+
+    def test_bonus_account_does_not_have_yields_feature(self):
+        with self.assertRaises(AttributeError):
+            BonusAccount.generate_yield_for_savings_accounts(taxes=10)
