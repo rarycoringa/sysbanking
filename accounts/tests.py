@@ -58,11 +58,62 @@ class CreateAccountTestCase(TransactionTestCase):
 
 
 class RetrieveAccountTestCase(TransactionTestCase):
-    ...
+    def setUp(self):
+        self.dummy_simple_account = Account.objects.create(number=997, balance=100.0)
+        self.dummy_bonus_account = BonusAccount.objects.create(number=998, balance=200.0, points=15)
+        self.dummy_savings_account = SavingsAccount.objects.create(number=999, balance=300.0)
 
+        self.dummy_accounts = [
+            self.dummy_simple_account,
+            self.dummy_bonus_account.account_ptr,
+            self.dummy_savings_account.account_ptr,
+        ]
 
-class RetrieveAccountBalanceTestCase(TransactionTestCase):
-    ...
+    def test_retrieve_all_accounts(self):
+        accounts = Account.objects.all()
+
+        self.assertEqual(len(accounts), len(self.dummy_accounts))
+        self.assertCountEqual(accounts, self.dummy_accounts)
+
+    def test_retrieve_simple_account_by_number(self):
+        account = Account.objects.get(number=self.dummy_simple_account.number)
+
+        self.assertEqual(account, self.dummy_simple_account)
+        self.assertEqual(account.balance, self.dummy_simple_account.balance)
+        
+        self.assertNotIsInstance(account, BonusAccount)
+        self.assertNotIsInstance(account, SavingsAccount)
+
+    def test_retrieve_bonus_account_by_number(self):
+        account = BonusAccount.objects.get(number=self.dummy_bonus_account.number)
+
+        self.assertEqual(account, self.dummy_bonus_account)
+        self.assertEqual(account.balance, self.dummy_bonus_account.balance)
+        self.assertEqual(account.points, self.dummy_bonus_account.points)
+
+        self.assertIsInstance(account, Account)
+        self.assertNotIsInstance(account, SavingsAccount)
+
+    def test_retrieve_savings_account_by_number(self):
+        account = SavingsAccount.objects.get(number=self.dummy_savings_account.number)
+
+        self.assertEqual(account, self.dummy_savings_account)
+        self.assertEqual(account.balance, self.dummy_savings_account.balance)
+
+        self.assertIsInstance(account, Account)
+        self.assertNotIsInstance(account, BonusAccount)
+
+    def test_simple_account_does_not_exists(self):
+        with self.assertRaises(Account.DoesNotExist):
+            Account.objects.get(number=0)
+
+    def test_bonus_account_does_not_exists(self):
+        with self.assertRaises(BonusAccount.DoesNotExist):
+            BonusAccount.objects.get(number=0)
+
+    def test_savings_account_does_not_exists(self):
+        with self.assertRaises(SavingsAccount.DoesNotExist):
+            SavingsAccount.objects.get(number=0)
 
 
 class DepositTestCase(TransactionTestCase):
