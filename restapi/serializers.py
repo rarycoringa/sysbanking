@@ -54,5 +54,9 @@ class TransactionSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=15, decimal_places=2)
 
 
+class TransferSerializer(TransactionSerializer):
+    to_account = serializers.IntegerField()
+
+
 class GenerateYieldsSerializer(serializers.Serializer):
     tax = serializers.DecimalField(max_digits=15, decimal_places=2)

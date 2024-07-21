@@ -2,7 +2,6 @@ from typing import Dict
 from typing import List
 from typing import Set
 
-from django.db.models.query import QuerySet
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -13,6 +12,8 @@ from accounts.models import AccountType
 from accounts.models import Account
 from accounts.models import BonusAccount
 from accounts.models import SavingsAccount
+from accounts.exceptions import InsufficientBalance
+from accounts.exceptions import NegativeTransaction
 from restapi.mixins import GetAccountMultipleTypesMixin
 from restapi.serializers import AccountSerializer
 from restapi.serializers import BonusAccountSerializer
@@ -21,6 +22,7 @@ from restapi.serializers import DetailAccountSerializer
 from restapi.serializers import DetailBonusAccountSerializer
 from restapi.serializers import DetailSavingsAccountSerializer
 from restapi.serializers import TransactionSerializer
+from restapi.serializers import TransferSerializer
 from restapi.serializers import GenerateYieldsSerializer
 
 
@@ -106,16 +108,42 @@ class AccountDepositAPIView(APIView, GetAccountMultipleTypesMixin):
         serializer: TransactionSerializer = TransactionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        account.deposit(amount=serializer.validated_data["amount"])
+        try:
+            account.deposit(amount=serializer.validated_data["amount"])
+        except NegativeTransaction as err:
+            return Response(err, status=status.HTTP_403_FORBIDDEN)
 
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
-class AccountTransferAPIView(APIView):
+class AccountTransferAPIView(APIView, GetAccountMultipleTypesMixin):
     
     def put(self, request: Request, number, format=None):
-        ...
+        try:
+            account: Account = self.get_account_by_number(number)
+        except:
+            return Response("Origin account not found", status.HTTP_404_NOT_FOUND)
+        
+        serializer: TransferSerializer = TransferSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        try:
+            to_account: Account = self.get_account_by_number(serializer.validated_data["to_account"])
+        except:
+            return Response("Target account not found", status.HTTP_404_NOT_FOUND)
+
+        try:
+            Account.transfer(
+                amount=serializer.validated_data["amount"],
+                from_account=account,
+                to_account=to_account,
+            )
+        except NegativeTransaction as err:
+            return Response(err, status=status.HTTP_403_FORBIDDEN)
+        except InsufficientBalance as err:
+            return Response(err, status=status.HTTP_403_FORBIDDEN)
+        
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 class AccountWithdrawAPIView(APIView, GetAccountMultipleTypesMixin):
     
@@ -128,7 +156,12 @@ class AccountWithdrawAPIView(APIView, GetAccountMultipleTypesMixin):
         serializer: TransactionSerializer = TransactionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        account.withdraw(amount=serializer.validated_data["amount"])
+        try:
+            account.withdraw(amount=serializer.validated_data["amount"])
+        except NegativeTransaction as err:
+            return Response(err, status=status.HTTP_403_FORBIDDEN)
+        except InsufficientBalance as err:
+            return Response(err, status=status.HTTP_403_FORBIDDEN)
 
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
