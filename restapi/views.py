@@ -1,7 +1,6 @@
 from typing import Dict
 from typing import List
 from typing import Set
-from typing import ClassVar
 
 from django.db.models.query import QuerySet
 from rest_framework import status
@@ -14,12 +13,15 @@ from accounts.models import AccountType
 from accounts.models import Account
 from accounts.models import BonusAccount
 from accounts.models import SavingsAccount
+from restapi.mixins import GetAccountMultipleTypesMixin
 from restapi.serializers import AccountSerializer
 from restapi.serializers import BonusAccountSerializer
 from restapi.serializers import SavingsAccountSerializer
 from restapi.serializers import DetailAccountSerializer
 from restapi.serializers import DetailBonusAccountSerializer
 from restapi.serializers import DetailSavingsAccountSerializer
+from restapi.serializers import TransactionSerializer
+from restapi.serializers import GenerateYieldsSerializer
 
 
 class AccountListAPIView(APIView):
@@ -73,7 +75,7 @@ class AccountListAPIView(APIView):
         return all_accounts
 
 
-class AccountDetailAPIView(APIView):
+class AccountDetailAPIView(APIView, GetAccountMultipleTypesMixin):
     serializer_class_map: Dict[str, AccountSerializer] = {
         AccountType.simple.value: DetailAccountSerializer,
         AccountType.bonus.value: DetailBonusAccountSerializer,
@@ -82,7 +84,7 @@ class AccountDetailAPIView(APIView):
 
     def get(self, request: Request, number: int, format=None) -> Response:
         try:
-            account: Account | None = self.get_account_by_number(number)
+            account: Account = self.get_account_by_number(number)
         except:
             return Response("Account not found", status.HTTP_404_NOT_FOUND)
 
@@ -92,44 +94,51 @@ class AccountDetailAPIView(APIView):
 
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def get_account_by_number(self, number: int) -> Account | BonusAccount | SavingsAccount:
-        account: QuerySet[BonusAccount] = BonusAccount.objects.filter(
-            number=number,
-        )
 
-        if account:
-            return account.get()
-
-        account: QuerySet[SavingsAccount] = SavingsAccount.objects.filter(
-            number=number,
-        )
-
-        if account:
-            return account.get()
-        
-        account: QuerySet[Account] = Account.objects.filter(
-            number=number,
-        )
-        
-        return account.get()
-
-
-class AccountDepositAPIView(APIView):
+class AccountDepositAPIView(APIView, GetAccountMultipleTypesMixin):
     
-    def put(self, request, number, format=None):
-        ...
+    def put(self, request: Request, number: int, format=None) -> Response:
+        try:
+            account: Account = self.get_account_by_number(number)
+        except:
+            return Response("Account not found", status.HTTP_404_NOT_FOUND)
+
+        serializer: TransactionSerializer = TransactionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        account.deposit(amount=serializer.validated_data["amount"])
+
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
 
 class AccountTransferAPIView(APIView):
     
-    def put(self, request, number, format=None):
+    def put(self, request: Request, number, format=None):
         ...
 
-class AccountWithdrawAPIView(APIView):
+
+class AccountWithdrawAPIView(APIView, GetAccountMultipleTypesMixin):
     
-    def put(self, request, number, format=None):
-        ...
+    def put(self, request: Request, number: int, format=None) -> Response:
+        try:
+            account: Account = self.get_account_by_number(number)
+        except:
+            return Response("Account not found", status.HTTP_404_NOT_FOUND)
+
+        serializer: TransactionSerializer = TransactionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        account.withdraw(amount=serializer.validated_data["amount"])
+
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
 
 class GenerateYieldAPIView(APIView):
 
-    def put(self, request, format=None):
-        ...
+    def put(self, request: Request, format=None):
+        serializer: GenerateYieldsSerializer = GenerateYieldsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        SavingsAccount.generate_yield_for_savings_accounts(serializer.validated_data["tax"])
+
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

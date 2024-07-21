@@ -11,10 +11,10 @@ from restapi.views import GenerateYieldAPIView
 app_name = RestAPIConfig.name
 
 urlpatterns = [
-    path("accounts/", AccountListAPIView.as_view()),
-    path("accounts/<int:number>/", AccountDetailAPIView.as_view()),
-    path("accounts/<int:number>/deposit/", AccountDepositAPIView.as_view()),
-    path("accounts/<int:number>/transfer/", AccountTransferAPIView.as_view()),
-    path("accounts/<int:number>/withdraw/", AccountWithdrawAPIView.as_view()),
+    path("accounts", AccountListAPIView.as_view()),
+    path("accounts/<int:number>", AccountDetailAPIView.as_view()),
+    path("accounts/<int:number>/deposit", AccountDepositAPIView.as_view()),
+    path("accounts/<int:number>/transfer", AccountTransferAPIView.as_view()),
+    path("accounts/<int:number>/withdraw", AccountWithdrawAPIView.as_view()),
     path("accounts/yields", GenerateYieldAPIView.as_view()),
 ]

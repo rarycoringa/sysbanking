@@ -49,3 +49,10 @@ class DetailSavingsAccountSerializer(serializers.ModelSerializer):
         model = SavingsAccount
         fields = ['id', 'number', 'balance', 'type']
 
+
+class TransactionSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+
+
+class GenerateYieldsSerializer(serializers.Serializer):
+    tax = serializers.DecimalField(max_digits=15, decimal_places=2)
