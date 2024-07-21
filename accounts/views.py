@@ -8,7 +8,7 @@ from typing import Callable
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
-from django.db.models.base import Model as Model
+from django.db.models.base import Model
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -197,6 +197,7 @@ class MakeTransferView(TemplateTitleMixin, CurrentYearMixin, TransferView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
+
 
 class GenerateYieldsView(TemplateTitleMixin, CurrentYearMixin, TemplateView):
     template_title: str = "Generate Yields"

@@ -3,11 +3,18 @@ from __future__ import annotations
 import uuid
 import decimal
 
+from enum import Enum
+
 from django.db import models
 from django.core.validators import MinValueValidator
 
 from accounts.exceptions import InsufficientBalance
 from accounts.exceptions import NegativeTransaction
+
+class AccountType(str, Enum):
+    simple = "simple"
+    bonus = "bonus"
+    savings = "savings"
 
 
 class Account(models.Model):
@@ -40,7 +47,7 @@ class Account(models.Model):
 
     @property
     def type(self) -> str:     
-        return "simple"
+        return AccountType.simple
     
     @property
     def verbose_type(self) -> str:
@@ -103,7 +110,7 @@ class BonusAccount(Account):
 
     @property
     def type(self) -> str:     
-        return "bonus"
+        return AccountType.bonus
 
     @property
     def verbose_type(self) -> str:
@@ -139,7 +146,7 @@ class BonusAccount(Account):
 class SavingsAccount(Account):
     @property
     def type(self) -> str:     
-        return "savings"
+        return AccountType.savings
 
     @property
     def verbose_type(self) -> str:
