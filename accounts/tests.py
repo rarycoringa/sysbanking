@@ -55,3 +55,27 @@ class CreateAccountTestCase(TransactionTestCase):
         for number in self.dummy_accounts:
             with self.assertRaises(IntegrityError):
                 Account.objects.create(number=number)
+
+
+class RetrieveAccountTestCase(TransactionTestCase):
+    ...
+
+
+class RetrieveAccountBalanceTestCase(TransactionTestCase):
+    ...
+
+
+class DepositTestCase(TransactionTestCase):
+    ...
+
+
+class WithdrawTestCase(TransactionTestCase):
+    ...
+
+
+class TransferTestCase(TransactionTestCase):
+    ...
+
+
+class YieldsTestCase(TransactionTestCase):
+    ...
