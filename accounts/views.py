@@ -209,3 +209,20 @@ class GenerateYieldsView(TemplateTitleMixin, CurrentYearMixin, TemplateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('accounts:list')
+
+class SearchAccountsView(TemplateTitleMixin, CurrentYearMixin, GetAccountMultipleTypesMixin, TemplateView):
+    template_title: str = "Search Accounts"
+    template_name: str = "accounts/search.html"
+    model : Account
+    def post(self, request, *args, **kwargs):
+        account_number = request.POST["account_number"]
+        try:
+            account = self.get_account_by_number(account_number)
+            self.object = account
+            return HttpResponseRedirect(self.get_success_url())
+        except:
+            reason: str = "Failed retrieving account information."
+            messages.error(self.request, reason, extra_tags="danger")
+            return self.render_to_response(self.get_context_data())
+    def get_success_url(self) -> str:
+            return reverse_lazy('accounts:detail', kwargs={"number": self.object.number})
