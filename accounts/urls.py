@@ -8,6 +8,7 @@ from accounts.views import MakeDepositView
 from accounts.views import MakeTransferView
 from accounts.views import MakeWithdrawView
 from accounts.views import GenerateYieldsView
+from accounts.views import SearchAccountsView
 
 app_name = AccountsConfig.name
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path("<int:number>/transfer/", MakeTransferView.as_view(), name="transfer"),
     path("<int:number>/withdraw/", MakeWithdrawView.as_view(), name="withdraw"),
     path("yields/", GenerateYieldsView.as_view(), name="yields"),
+    path("search/", SearchAccountsView.as_view(), name="search")
 ]
