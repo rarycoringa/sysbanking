@@ -9,10 +9,11 @@ djangorestframework = "~=3.15.0"
 
 [dev-packages]
 coverage = "~=7.6.0"
+pyflakes = "~=3.2.0"
+pylint = "~=3.2.6"
 
 [requires]
 python_version = "3.11"
-python_full_version = "3.11.3"
 
 [scripts]
 server = "python manage.py runserver"
@@ -21,3 +22,5 @@ migrate = "python manage.py migrate"
 tests = "python manage.py test"
 coverage = "coverage run manage.py test"
 coverage-report = "coverage report -m"
+pyflakes = "python -m pyflakes ."
+lint = "pylint accounts restapi sysbanking --exit-zero"
