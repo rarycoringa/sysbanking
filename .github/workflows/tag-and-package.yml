@@ -38,10 +38,10 @@ jobs:
         run: |
           echo "RC_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           echo "$RC_NAME"
-          zip -r ${{vars.GITHUB_REF_NAME}}.zip .
+          zip -r $RC_NAME.zip .
 
       - name: Archive file
         uses: actions/upload-artifact@v4
         with:
-          name: ${{vars.GITHUB_REF_NAME}}
-          path: ./${{vars.GITHUB_REF_NAME}}.zip
+          name: $RC_NAME
+          path: ./$RC_NAME.zip
