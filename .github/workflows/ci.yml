@@ -6,10 +6,12 @@ on:
     - 'rc-*'
     branches:
     - main
+    - staging
     - feature*
   pull_request:
     branches:
     - main
+    - staging
 
 jobs:
   build:
@@ -42,3 +44,27 @@ jobs:
       run: |
         pipenv run coverage
         pipenv run coverage-report
+
+  lint:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.11
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pipenv install --dev
+        
+    - name: Static code analyser
+      run: |
+        pipenv run lint
+        
