@@ -13,8 +13,8 @@ jobs:
   package-release-candidate:
     runs-on: ubuntu-latest
 
-    if: |
-      github.ref_type == 'tag'
+    if: >
+      github.ref_type == 'tag' &&
       github.ref != 'refs/heads/main'
     
     steps:
