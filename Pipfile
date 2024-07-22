@@ -5,9 +5,19 @@ name = "pypi"
 
 [packages]
 django = "~=5.0"
+djangorestframework = "~=3.15.0"
 
 [dev-packages]
+coverage = "~=7.6.0"
 
 [requires]
 python_version = "3.11"
 python_full_version = "3.11.3"
+
+[scripts]
+server = "python manage.py runserver"
+makemigrations = "python manage.py makemigrations"
+migrate = "python manage.py migrate"
+tests = "python manage.py test"
+coverage = "coverage run manage.py test"
+coverage-report = "coverage report -m"

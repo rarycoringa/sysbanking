@@ -12,7 +12,9 @@
                 <a href="{% url 'accounts:yields' %}" class="btn btn-secondary w-100">Generate Yields</a>
             </div>
         </div>
-
+        <div class="card-body d-flex flex-column justify-content-center gap-3 col mb-3">
+            <a href="{% url 'accounts:search' %}" class="btn btn-secondary w-200">Search Accounts</a>
+        </div>
         <div class="row row-cols-3">
             {% for account in accounts %}
                 <div class="col mb-3">

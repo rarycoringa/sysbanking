@@ -3,11 +3,18 @@ from __future__ import annotations
 import uuid
 import decimal
 
+from enum import Enum
+
 from django.db import models
 from django.core.validators import MinValueValidator
 
 from accounts.exceptions import InsufficientBalance
 from accounts.exceptions import NegativeTransaction
+
+class AccountType(str, Enum):
+    simple = "simple"
+    bonus = "bonus"
+    savings = "savings"
 
 
 class Account(models.Model):
@@ -35,16 +42,20 @@ class Account(models.Model):
         blank=False,
         null=False,
         default=decimal.Decimal(0.0),
-        validators=[MinValueValidator(decimal.Decimal(0.0))]
+        validators=[MinValueValidator(decimal.Decimal(-1000.0))]
     )
 
     @property
     def type(self) -> str:     
-        return "simple"
+        return AccountType.simple
     
     @property
     def verbose_type(self) -> str:
         return "Account"
+    
+    @property
+    def minimum_balance_value(self) -> decimal.Decimal:
+        return decimal.Decimal(-1000.0)
 
     def deposit(self, amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
@@ -64,7 +75,7 @@ class Account(models.Model):
         if amount < decimal.Decimal(0.0):
             raise NegativeTransaction("Unable to process transaction. Please enter a non-negative value for the transaction amount.")
 
-        if self.balance < amount:
+        if (self.balance - amount) < self.minimum_balance_value:
             raise InsufficientBalance("Account doesn't have sufficient balance.")
 
         self.balance: decimal.Decimal = self.balance - amount
@@ -99,7 +110,7 @@ class BonusAccount(Account):
 
     @property
     def type(self) -> str:     
-        return "bonus"
+        return AccountType.bonus
 
     @property
     def verbose_type(self) -> str:
@@ -135,11 +146,15 @@ class BonusAccount(Account):
 class SavingsAccount(Account):
     @property
     def type(self) -> str:     
-        return "savings"
+        return AccountType.savings
 
     @property
     def verbose_type(self) -> str:
         return "Savings Account"
+    
+    @property
+    def minimum_balance_value(self) -> decimal.Decimal:
+        return decimal.Decimal(0.0)
 
     @classmethod
     def generate_yield_for_savings_accounts(cls, taxes: decimal.Decimal) -> None:

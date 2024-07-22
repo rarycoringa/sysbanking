@@ -10,7 +10,7 @@
                     <form method="POST">
                         <div class="card-header">
                             <span class="fs-6 fw-bold text-secondary-emphasis">
-                                Create an Account
+                                Search Account Information
                             </span>
                         </div>
 
@@ -27,13 +27,8 @@
                             {% endif %}
 
                             <div class="form-floating mb-3">
-                                <input type="number" class="form-control" name="number" id="number" placeholder="123456" required>
-                                <label for="number" class="form-label">{{ form.number.label_tag }}</label>
-                            </div>
-
-                            <div id="initialBalanceInput" class="form-floating mb-3">
-                                <input type="number" step=".01" class="form-control" name="balance" id="balance" placeholder="123456" value=0>
-                                <label for="balance" class="form-label">Initial Balance</label>
+                                <input type="number" step=".01" class="form-control" name="account_number" id="account_number" placeholder="10.5" required>
+                                <label for="account_number" class="form-label">Account Number</label>
                             </div>
 
                             {% if form.number.errors %}
@@ -43,21 +38,10 @@
                             </div>
                             {% endfor %}
                             {% endif %}
-
-                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check" name="type" value="simple" id="simple" autocomplete="off" checked>
-                                <label class="btn btn-outline-secondary" for="simple">Simple Account</label>
-                              
-                                <input type="radio" class="btn-check" name="type" value="savings" id="savings" autocomplete="off">
-                                <label class="btn btn-outline-secondary" for="savings">Savings Account</label>
-                              
-                                <input type="radio" class="btn-check" name="type" value="bonus" id="bonus" autocomplete="off">
-                                <label class="btn btn-outline-secondary" for="bonus">Bonus Account</label>
-                            </div>
                         </div>
 
                         <div class="card-footer d-flex flex-columns justify-content-evenly gap-3">
-                            <button type="submit" class="btn btn-secondary flex-fill">Create</button>
+                            <button type="submit" class="btn btn-secondary flex-fill">Search</button>
                         </div>
                     </form>
                 </div>
@@ -72,18 +56,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.querySelectorAll('input[type="radio"][name="type"]').forEach( e => {
-            e.addEventListener('change', function() {
-                if (this.value == "savings" || this.value == "simple") {
-                    initialBalanceInput.style.display = "block";               
-                } else {
-                    initialBalanceInput.style.display = "none";     
-                    balance.value = 0;
-                }
-            })
-        })
-    </script>
     
 {% endblock %}
