@@ -32,7 +32,7 @@ jobs:
       run: |
         pipenv run pyflakes
         
-    - name: Run Tests
+    - name: Run tests
       run: |
         pipenv run tests
     
