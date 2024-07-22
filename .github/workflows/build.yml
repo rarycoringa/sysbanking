@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - main
+    - feature*
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.11
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pipenv lock
+        pipenv install --dev
+        
+    - name: Syntax check
+      run: |
+        pipenv run pyflakes
+        
+    - name: Run Tests
+      run: |
+        pipenv run tests
+    
+    - name: Coverage report
+      run: |
+        pipenv run coverage
+        pipenv run coverage-report
