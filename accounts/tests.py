@@ -4,6 +4,7 @@ import uuid
 from django.test import TransactionTestCase
 from django.db.utils import IntegrityError
 from accounts.exceptions import NegativeTransaction
+from accounts.exceptions import InsufficientBalance
 
 from accounts.models import AccountType
 from accounts.models import Account
@@ -148,11 +149,62 @@ class DepositTestCase(TransactionTestCase):
 
 
 class WithdrawTestCase(TransactionTestCase):
-    ...
+    def setUp(self):
+        self.dummy_regular_account = Account.objects.create(number=100)
+        self.dummy_bonus_account = BonusAccount.objects.create(number=200)
+        self.dummy_savings_account = SavingsAccount.objects.create(number=300)
+    
+    def test_regular_withdraw(self):
+        self.assertEqual(self.dummy_bonus_account.balance, 0)
+        self.dummy_bonus_account.withdraw(1000)
+        self.assertEqual(self.dummy_bonus_account.balance, -1000)
+
+    def test_negative_withdraw(self):
+        self.assertEqual(self.dummy_regular_account.balance, 0)
+        with self.assertRaises(NegativeTransaction):
+            self.dummy_regular_account.withdraw(-1)
+        self.assertEqual(self.dummy_regular_account.balance, 0)
+
+    def test_negative_balance(self):
+        self.assertEqual(self.dummy_savings_account.balance, 0)
+        with self.assertRaises(InsufficientBalance):
+            self.dummy_savings_account.withdraw(100)
+        self.assertEqual(self.dummy_savings_account.balance, 0)
 
 
 class TransferTestCase(TransactionTestCase):
-    ...
+    def setUp(self):
+        self.dummy_regular_account = Account.objects.create(number=100)
+        self.dummy_regular_receiver_account = Account.objects.create(number=150)
+        self.dummy_bonus_account = BonusAccount.objects.create(number=200)
+        self.dummy_savings_account = SavingsAccount.objects.create(number=300)
+
+    def test_negative_transfer(self):
+        self.assertEqual(self.dummy_regular_account.balance, 0)
+        self.assertEqual(self.dummy_regular_receiver_account.balance, 0)
+        with self.assertRaises(NegativeTransaction):
+            self.dummy_regular_account.transfer(-1, self.dummy_regular_account, self.dummy_regular_receiver_account)
+        self.assertEqual(self.dummy_regular_account.balance, 0)
+        self.assertEqual(self.dummy_regular_receiver_account.balance, 0)
+
+    def test_negative_balance(self):
+        self.assertEqual(self.dummy_savings_account.balance, 0)
+        self.assertEqual(self.dummy_regular_receiver_account.balance, 0)
+        with self.assertRaises(InsufficientBalance):
+            self.dummy_savings_account.transfer(1, self.dummy_savings_account, self.dummy_regular_receiver_account)
+        self.assertEqual(self.dummy_savings_account.balance, 0)
+        self.assertEqual(self.dummy_regular_receiver_account.balance, 0)
+
+    def test_bonus_acc_benefits(self):
+        test_list = [[0, 10, 149], 
+                    [149, 10, 150],
+                    [299, 11, 151],
+                    [450, 12, 0]]
+        self.dummy_regular_account.deposit(5000)
+        for i in range (0, 4):
+            self.assertEqual(self.dummy_bonus_account.balance, test_list[i][0])
+            self.assertEqual(self.dummy_bonus_account.points, test_list[i][1])
+            self.dummy_regular_account.transfer(test_list[i][2], self.dummy_regular_account, self.dummy_bonus_account)
 
 
 class YieldsTestCase(TransactionTestCase):
