@@ -1,12 +1,14 @@
-name: Tagging
+name: Tag and Package
 
 on:
   push:
     branches:
     - main
+    - feature*
 
 jobs:
   tagging:
+  
     runs-on: ubuntu-latest
     
     steps:
@@ -22,3 +24,20 @@ jobs:
         run: |
           git tag $TAG_NAME
           git push origin $TAG_NAME
+          
+  packaging:
+    runs-on: ubuntu-latest
+    needs: tagging
+    if: github.ref != 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create zip file
+        run: zip -r ${{vars.GITHUB_REF_NAME}}.zip .
+
+      - name: Archive file
+        uses: actions/upload-artifact@v4
+        with:
+          name: source_code
+          path: ./${{vars.GITHUB_REF_NAME}}.zip
