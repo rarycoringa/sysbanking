@@ -8,7 +8,6 @@ from typing import Callable
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
-from django.db.models.base import Model
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -205,7 +204,7 @@ class GenerateYieldsView(TemplateTitleMixin, CurrentYearMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         tax = request.POST.get("tax")
-        result = SavingsAccount.generate_yield_for_savings_accounts(tax)
+        SavingsAccount.generate_yield_for_savings_accounts(tax)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self) -> str:
@@ -215,6 +214,7 @@ class SearchAccountsView(TemplateTitleMixin, CurrentYearMixin, GetAccountMultipl
     template_title: str = "Search Accounts"
     template_name: str = "accounts/search.html"
     model : Account
+    
     def post(self, request, *args, **kwargs):
         account_number = request.POST["account_number"]
         try:
