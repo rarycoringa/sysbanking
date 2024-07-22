@@ -145,6 +145,7 @@ class AccountTransferAPIView(APIView, GetAccountMultipleTypesMixin):
         
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
+
 class AccountWithdrawAPIView(APIView, GetAccountMultipleTypesMixin):
     
     def put(self, request: Request, number: int, format=None) -> Response:
