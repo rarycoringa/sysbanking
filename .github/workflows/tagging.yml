@@ -10,7 +10,7 @@ on:
     - main
 
 jobs:
-  build:
+  tagging-commit:
     runs-on: ubuntu-latest
     
     steps:
@@ -18,13 +18,11 @@ jobs:
       
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+        run: echo "date=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Mounting the Tag
         id: tagwriting
-        run: echo $TAG_NAME
-        env:
-          TAG_NAME: build-${{ steps.date.outputs.date }}
+        run: echo "TAG_NAME=build-${{ env.date }}" >> $GITHUB_ENV
 
       - name: Tagging the commit
         run: |
