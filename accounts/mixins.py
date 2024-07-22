@@ -102,3 +102,14 @@ class TransactionValidationMixin():
         messages.error(self.request, reason, extra_tags="danger")
 
         return self.render_to_response(self.get_context_data())
+
+class SearchAccountMixin():
+    request: HttpRequest
+    render_to_response: callable
+    get_context_data: callable
+
+    def transaction_invalid(self, reason: str = "Failed retrieving account information.") -> HttpResponse:
+        """If the form is invalid, render the invalid form."""
+        messages.error(self.request, reason, extra_tags="danger")
+
+        return self.render_to_response(self.get_context_data())
