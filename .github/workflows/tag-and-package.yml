@@ -39,5 +39,5 @@ jobs:
       - name: Archive file
         uses: actions/upload-artifact@v4
         with:
-          name: source_code
+          name: ${{vars.GITHUB_REF_NAME}}
           path: ./${{vars.GITHUB_REF_NAME}}.zip
