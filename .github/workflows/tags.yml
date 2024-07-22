@@ -12,10 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get current datetime
+        run: echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
+
       - name: Mount build tag name
-        run: |
-          echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
-          echo "TAG_NAME=build-${{ env.date }}" >> $GITHUB_ENV
+        run: echo "TAG_NAME=build-${{ env.date }}" >> $GITHUB_ENV
 
       - name: Create build tag
         run: |
