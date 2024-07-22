@@ -1,0 +1,27 @@
+name: Tagging
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  tagging:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Get current datetime
+        run: echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
+
+      - name: Mount build tag name
+        run: echo "TAG_NAME=build-${{ env.date }}" >> $GITHUB_ENV
+
+      - name: Create build tag
+        run: |
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
