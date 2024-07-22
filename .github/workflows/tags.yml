@@ -1,0 +1,24 @@
+name: Tags
+
+on:
+  push:
+    branches:
+    - main
+    - feature*
+
+jobs:
+  build-tag:
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mount build tag name
+        run: |
+          echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
+          echo "TAG_NAME=build-${{ env.date }}" >> $GITHUB_ENV
+
+      - name: Create build tag
+        run: |
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
