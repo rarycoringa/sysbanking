@@ -1,4 +1,4 @@
-name: Tagging
+name: Tags
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
     - main
 
 jobs:
-  tagging:
+  build-tag:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Get current datetime
         run: echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
 
