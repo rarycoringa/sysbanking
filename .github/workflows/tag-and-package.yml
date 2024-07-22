@@ -36,7 +36,8 @@ jobs:
       
       - name: Create zip file
         run: |
-          echo "${GITHUB_REF#refs/tags/}"
+          echo "RC_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "$RC_NAME"
           zip -r ${{vars.GITHUB_REF_NAME}}.zip .
 
       - name: Archive file
