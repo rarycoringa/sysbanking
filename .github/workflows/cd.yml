@@ -1,0 +1,25 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches:
+    - main
+    - feature_*
+  workflow_run:
+    workflows:
+      - Continuous Integration
+    types:
+      - completed
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build docker image
+      run: |
+        docker build -t sysbanking:0.0 .
+
+        
