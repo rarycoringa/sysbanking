@@ -165,13 +165,14 @@ jobs:
 
       - name: Package source code
         run: |
-          zip -r ${{ release_tag_name }}.zip .
+          zip -r $release_tag_name.zip .
+          ls -la
 
       - name: Archieve source code package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ release_tag_name }}
-          path: ${{ release_tag_name }}.zip
+          name: $release_tag_name
+          path: $release_tag_name.zip
 
   docker-build:
     runs-on: ubuntu-latest
