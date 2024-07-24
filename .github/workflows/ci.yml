@@ -83,7 +83,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     # if: github.ref_name != 'main'
-    needs: build
+    needs: test
 
     steps:
     - uses: actions/checkout@v4
@@ -163,13 +163,13 @@ jobs:
 
       - name: Package source code
         run: |
-          zip -r $RELEASE_TAG_NAME.zip .
+          zip -r ${RELEASE_TAG_NAME}.zip .
 
       - name: Archieve source code package
         uses: actions/upload-artifact@v4
         with:
-          name: $RELEASE_TAG_NAME
-          path: $RELEASE_TAG_NAME.zip
+          name: ${RELEASE_TAG_NAME}
+          path: ${RELEASE_TAG_NAME}.zip
 
   docker-build:
     runs-on: ubuntu-latest
@@ -184,4 +184,4 @@ jobs:
 
     - name: Build docker image
       run: |
-        docker build -t sysbanking:$RELEASE_TAG_NAME .
+        docker build -t sysbanking:${RELEASE_TAG_NAME} .
