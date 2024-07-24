@@ -7,18 +7,23 @@ on:
     - feature_*
   workflow_run:
     workflows:
-      - ci
-    types:
+      - "Continuous Integration"
+    branches:
+      - main
+      - feature_*
+    types: 
       - completed
 
 jobs:
   docker-build:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - uses: actions/checkout@v4
     
+    #   name: Wait for tag to build
+    # - uses: lewagon/wait-on-check-action@v1.3.4
+
     - name: Build docker image
       run: |
         docker build -t sysbanking:0.0 .
