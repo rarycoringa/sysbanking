@@ -198,6 +198,10 @@ jobs:
       id: build_docker_image
       run: |
         docker build -t ${{ steps.generate_docker_image_name.outputs.docker_image_name }} .
+
+    - name: Save docker image
+      id: save_docker_image
+      run: |
         docker save ${{ steps.generate_docker_image_name.outputs.docker_image_name }} -o ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.tar
 
     - name: Archieve docker build image
@@ -205,7 +209,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}
-        path: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.zip
+        path: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.tar
 
   docker-publish:
     runs-on: ubuntu-latest
