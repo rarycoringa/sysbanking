@@ -9,9 +9,8 @@ on:
     - staging
     - production
 
-    - feature_*
-
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
@@ -33,6 +32,7 @@ jobs:
     - name: Syntax check
       run: |
         pipenv run pyflakes
+
 
   test:
     runs-on: ubuntu-latest
@@ -61,6 +61,7 @@ jobs:
         pipenv run coverage
         pipenv run coverage-report
 
+
   tag-build:
     runs-on: ubuntu-latest
     if: github.ref_name == 'main'
@@ -79,6 +80,7 @@ jobs:
         run: |
           git tag $TAG_NAME
           git push origin $TAG_NAME
+
 
   lint:
     runs-on: ubuntu-latest
@@ -102,7 +104,8 @@ jobs:
     - name: Static code analyser
       run: |
         pipenv run lint
-        
+
+
   package-release-candidate:
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'rc-')
@@ -121,9 +124,10 @@ jobs:
           name: ${{ github.ref_name }}
           path: ${{ github.ref_name }}.zip
 
+
   tag-release:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'branch' && github.ref_name == 'production'
+    if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: lint
 
     outputs:
@@ -152,9 +156,10 @@ jobs:
           git tag ${{ steps.generate_release_tag_name.outputs.release_tag_name }}
           git push origin ${{ steps.generate_release_tag_name.outputs.release_tag_name }}
 
+
   package-release:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'branch' && github.ref_name == 'production'
+    if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: tag-release
 
     env:
@@ -173,9 +178,10 @@ jobs:
           name: ${{ env.release_tag_name }}
           path: ${{ env.release_tag_name }}.zip
 
+
   docker-build:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'branch' && github.ref_name == 'production'
+    if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: tag-release
 
     outputs:
@@ -211,9 +217,10 @@ jobs:
         name: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}
         path: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.tar
 
+
   docker-publish:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'branch' && github.ref_name == 'production'
+    if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: docker-build
     
     steps:
