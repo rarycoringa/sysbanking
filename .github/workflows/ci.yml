@@ -63,7 +63,7 @@ jobs:
 
   tag-build:
     runs-on: ubuntu-latest
-    # if: github.ref_name == 'main'
+    if: github.ref_name == 'main'
     needs: test
 
     steps:
@@ -82,7 +82,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    # if: github.ref_name != 'main'
+    if: github.ref_name != 'main'
     needs: test
 
     steps:
@@ -105,7 +105,7 @@ jobs:
         
   package-release-candidate:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'rc-')
     needs: lint
 
     steps:
@@ -123,65 +123,67 @@ jobs:
 
   tag-release:
     runs-on: ubuntu-latest
-    # if: github.ref_name == 'production'
+    # if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: lint
+
+    outputs:
+      rc_tag_name: ${{ steps.retrieve_latest_release_candidate_tag.outputs.rc_tag_name }}
+      release_tag_name: ${{ steps.generate_release_tag_name.outputs.release_tag_name }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get current datetime
-        run: |
-          echo "date=$(date +'%Y%m%d%H%M%S%N')" >> $GITHUB_ENV
-
       - name: Retrieve latest release candidate tag
+        id: retrieve_latest_release_candidate_tag
         run: |
           git fetch --tags
-          echo "RC_TAG_NAME=$(git describe --match "rc-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+          echo "rc_tag_name=$(git describe --match "rc-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
 
       - name: Generate release tag name
+        id: generate_release_tag_name
+        env:
+          rc_tag_name: ${{ steps.retrieve_latest_release_candidate_tag.outputs.rc_tag_name }}
         run: |
-          echo "RELEASE_TAG_NAME=${RC_TAG_NAME//rc/rel}" >> $GITHUB_ENV
+          echo "release_tag_name=${rc_tag_name//rc/rel}" >> $GITHUB_OUTPUT
 
       - name: Create release tag
+        id: create_release_tag
         run: |
-          git tag $RELEASE_TAG_NAME
-          git push origin $RELEASE_TAG_NAME
+          git tag ${{ steps.generate_release_tag_name.outputs.release_tag_name }}
+          git push origin ${{ steps.generate_release_tag_name.outputs.release_tag_name }}
 
   package-release:
     runs-on: ubuntu-latest
     # if: github.ref_name == 'production'
     needs: tag-release
+
+    env:
+      release_tag_name: ${{ needs.tag-release.outputs.release_tag_name }}
     
     steps:
       - uses: actions/checkout@v4
 
-      - name: Retrieve latest release tag
-        run: |
-          git fetch --tags
-          echo "RELEASE_TAG_NAME=$(git describe --match "rel-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
-
       - name: Package source code
         run: |
-          zip -r $RELEASE_TAG_NAME.zip .
+          zip -r ${release_tag_name}.zip .
 
       - name: Archieve source code package
         uses: actions/upload-artifact@v4
         with:
-          name: $RELEASE_TAG_NAME
-          path: $RELEASE_TAG_NAME.zip
+          name: $release_tag_name
+          path: $release_tag_name.zip
 
   docker-build:
     runs-on: ubuntu-latest
     # if:
-    needs: package-release
+    needs: tag-release
+
+    env:
+      release_tag_name: ${{ needs.tag-release.outputs.release_tag_name }}
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Retrieve latest release tag
-      run: |
-        echo "RELEASE_TAG_NAME=$(git describe --match "rel-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
-
     - name: Build docker image
       run: |
-        docker build -t sysbanking:$RELEASE_TAG_NAME .
+        docker build -t sysbanking:$release_tag_name .
