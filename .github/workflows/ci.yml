@@ -154,7 +154,7 @@ jobs:
 
   package-release:
     runs-on: ubuntu-latest
-    # if: github.ref_name == 'production'
+    # if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: tag-release
 
     env:
@@ -175,8 +175,12 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    # if:
+    # if: github.ref_type == 'branch' && github.ref_name == 'production'
     needs: tag-release
+
+    outputs:
+      docker_image_name: ${{ steps.generate_docker_image_name.outputs.docker_image_name }}
+      docker_image_file_name: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}
 
     env:
       release_tag_name: ${{ needs.tag-release.outputs.release_tag_name }}
@@ -184,6 +188,47 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Build docker image
+    - name: Generate docker image name
+      id: generate_docker_image_name
       run: |
-        docker build -t sysbanking:$release_tag_name .
+        echo "docker_image_name=${{ github.repository }}:$release_tag_name" >> $GITHUB_OUTPUT
+        echo "docker_image_file_name=docker-build-image" >> $GITHUB_OUTPUT
+
+    - name: Build docker image
+      id: build_docker_image
+      run: |
+        docker build -t ${{ steps.generate_docker_image_name.outputs.docker_image_name }} .
+        docker save ${{ steps.generate_docker_image_name.outputs.docker_image_name }} -o ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.tar
+
+    - name: Archieve docker build image
+      id: archieve_docker_build_image
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}
+        path: ${{ steps.generate_docker_image_name.outputs.docker_image_file_name }}.zip
+
+  docker-publish:
+    runs-on: ubuntu-latest
+    # if: github.ref_type == 'branch' && github.ref_name == 'production'
+    needs: docker-build
+    
+    steps:
+      - name: Download docker build image
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.docker-build.outputs.docker_image_file_name }}
+          path: .
+
+      - name: Load docker build image
+        run: docker load -i ${{ needs.docker-build.outputs.docker_image_file_name }}.tar
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish docker build image to Docker Hub
+        run: |
+          docker tag ${{ needs.docker-build.outputs.docker_image_name }} ${{ needs.docker-build.outputs.docker_image_name }}
+          docker push ${{ needs.docker-build.outputs.docker_image_name }}
