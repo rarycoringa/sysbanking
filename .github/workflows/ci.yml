@@ -163,13 +163,13 @@ jobs:
 
       - name: Package source code
         run: |
-          zip -r ${RELEASE_TAG_NAME}.zip .
+          zip -r ${{ RELEASE_TAG_NAME }}.zip .
 
       - name: Archieve source code package
         uses: actions/upload-artifact@v4
         with:
-          name: ${RELEASE_TAG_NAME}
-          path: ${RELEASE_TAG_NAME}.zip
+          name: ${{ RELEASE_TAG_NAME }}
+          path: ${{ RELEASE_TAG_NAME} }.zip
 
   docker-build:
     runs-on: ubuntu-latest
@@ -180,8 +180,9 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Retrieve latest release tag
-      run: echo "RELEASE_TAG_NAME=$(git describe --match "rel-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+      run: |
+        echo "RELEASE_TAG_NAME=$(git describe --match "rel-*" --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
 
     - name: Build docker image
       run: |
-        docker build -t sysbanking:${RELEASE_TAG_NAME} .
+        docker build -t sysbanking:${{ RELEASE_TAG_NAME }} .
