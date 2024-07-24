@@ -6,6 +6,7 @@ on:
     - 'rc-*'
     branches:
     - main
+    - feature_*
   pull_request:
     branches:
     - main
