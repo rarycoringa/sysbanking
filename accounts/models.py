@@ -15,7 +15,7 @@ class AccountType(str, Enum):
     simple = "simple"
     bonus = "bonus"
     savings = "savings"
-    unknown = 
+    unknown = "unknown"
 
 
 class Account(models.Model):
