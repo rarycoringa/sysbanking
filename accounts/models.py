@@ -79,7 +79,7 @@ class Account(models.Model):
         if (self.balance - amount) < self.minimum_balance_value:
             raise InsufficientBalance("Account doesn't have sufficient balance.")
 
-        self.balance: decimal.Decimal = self.balance
+        self.balance: decimal.Decimal = self.balance - amount
 
         self.save()
     
