@@ -116,6 +116,10 @@ class BonusAccount(Account):
     def verbose_type(self) -> str:
         return "Bonus Account"
     
+    @property
+    def minimum_balance_value(self) -> decimal.Decimal:
+        return decimal.Decimal(-2000.0)
+
     def add_points(self, amount: decimal.Decimal, cutoff_amount: decimal.Decimal) -> None:
         if type(amount) is not decimal.Decimal:
             amount: decimal.Decimal = decimal.Decimal(amount)
